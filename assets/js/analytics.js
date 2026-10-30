@@ -2,7 +2,7 @@
 // Each terminal function (DES, GP, DEAL...) is reported as its own page, e.g. /GP.
 (function () {
   "use strict";
-  var GA_ID = "G-XXXXXXXXXX";
+  var GA_ID = "G-R4J9R0F5J7";
 
   var live = /^G-[A-Z0-9]+$/.test(GA_ID) && GA_ID !== "G-XXXXXXXXXX" &&
     !/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
