@@ -207,14 +207,31 @@
     });
   });
 
-  // ---------- MSG: build a clean mailto ----------
+  // ---------- MSG: send through Web3Forms without leaving the page ----------
   var compose = document.getElementById("compose");
+  var hint = document.getElementById("m-hint");
+  var sendBtn = compose.querySelector("button[type=submit]");
+  function note(text, cls) {
+    hint.textContent = text;
+    hint.className = "hint" + (cls ? " " + cls : "");
+    say(text, cls === "err");
+  }
   compose.addEventListener("submit", function (e) {
     e.preventDefault();
-    var subj = document.getElementById("m-subj").value;
-    var body = document.getElementById("m-body").value;
-    say("Opening your email app.");
-    location.href = "mailto:bhawna98@hotmail.com?subject=" + encodeURIComponent(subj) + "&body=" + encodeURIComponent(body);
+    if (!window.fetch || !window.FormData) { compose.submit(); return; }
+    sendBtn.disabled = true;
+    note("Sending...");
+    fetch(compose.action, { method: "POST", headers: { Accept: "application/json" }, body: new FormData(compose) })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (!res.success) throw new Error(res.message);
+        compose.reset();
+        note("Message sent. Bhawna will reply to your email.", "ok");
+      })
+      .catch(function () {
+        note("Could not send. Please email bhawna98@hotmail.com instead.", "err");
+      })
+      .then(function () { sendBtn.disabled = false; });
   });
 
   // ---------- first paint: type the command, then draw the screen ----------

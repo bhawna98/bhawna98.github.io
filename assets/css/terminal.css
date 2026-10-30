@@ -308,6 +308,10 @@ blockquote footer { margin-top: 6px; color: var(--amber); font-size: 10.5px; }
 .send { display: flex; align-items: center; gap: 14px; padding: 12px; flex-wrap: wrap; }
 .key.wide { padding: 9px 22px; }
 .hint { color: var(--muted); font: 400 13.5px var(--sans); }
+.hint.ok { color: var(--up); }
+.hint.err { color: var(--down); }
+.send button:disabled { opacity: .6; cursor: progress; }
+.trap { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
 .direct > div { grid-template-columns: 6.5em 1fr; }
 
 /* ---------- BIO card ---------- */

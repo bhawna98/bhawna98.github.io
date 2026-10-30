@@ -11,7 +11,9 @@ if [ "$2" = "--copy-pdf" ] || [ "$1" = "--copy-pdf" ]; then
   [ "$1" = "--copy-pdf" ] && msg="Update portfolio PDF"
 fi
 
-python3 scripts/test.py | tail -1 | tee /dev/stderr | grep -q "FAIL 0" || { echo "Tests failed, not publishing."; exit 1; }
+out=$(python3 scripts/test.py 2>&1) || true
+echo "$out"
+echo "$out" | grep -q "^PASS [0-9]*  FAIL 0$" || { echo "Tests failed, not publishing."; exit 1; }
 
 git add -A
 if git diff --cached --quiet; then

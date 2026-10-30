@@ -106,16 +106,29 @@ with sync_playwright() as pw:
     check("reduced: no tape anim",pg.evaluate("getComputedStyle(document.querySelector('.tape-track')).animationName")=="none")
     check("reduced: DES immediately",pg.evaluate("getComputedStyle(document.getElementById('DES')).opacity")=="1")
     ctx.close()
-    # mailto composition
+    # contact form: Web3Forms is mocked, nothing is really sent
     ctx=b.new_context(); pg=ctx.new_page(); pg.goto(base+"#MSG"); pg.wait_for_timeout(400)
-    pg.evaluate("""document.getElementById('compose').addEventListener('submit',e=>{},true)""")
-    pg.fill("#m-body","Hi Bhawna & team")
-    pg.route("**/*",lambda r: r.continue_())
-    url=[]
-    pg.on("framenavigated",lambda f: url.append(f.url))
-    try:
-        pg.click("#compose button"); pg.wait_for_timeout(300)
-    except Exception as e: pass
-    check("msg status",pg.inner_text("#status")=="Opening your email app.",pg.inner_text("#status"))
+    sent=[]; reply={"ok":True}
+    def api(r):
+        sent.append((r.request.post_data_buffer or b"").decode("utf-8","replace"))
+        r.fulfill(status=200 if reply["ok"] else 400,content_type="application/json",
+                  body='{"success":true}' if reply["ok"] else '{"success":false,"message":"bad"}')
+    pg.route("https://api.web3forms.com/**",api)
+    pg.click("#compose button"); pg.wait_for_timeout(200)
+    check("msg required blocks empty",not sent,str(len(sent)))
+    pg.fill("#m-name","Alex Tan"); pg.fill("#m-from","alex@example.com"); pg.fill("#m-body","Hi Bhawna & team")
+    pg.click("#compose button"); pg.wait_for_timeout(400)
+    check("msg posted once",len(sent)==1,str(len(sent)))
+    check("msg payload",bool(sent) and all(k in sent[0] for k in ["access_key","alex@example.com","Hi Bhawna & team"]),sent[0][:300] if sent else "")
+    check("msg success status",pg.inner_text("#status").startswith("Message sent"),pg.inner_text("#status"))
+    check("msg form reset",pg.input_value("#m-body")=="")
+    check("msg stayed on page",pg.url.startswith(base))
+    reply["ok"]=False
+    pg.fill("#m-name","Alex Tan"); pg.fill("#m-from","alex@example.com"); pg.fill("#m-body","Second try")
+    pg.click("#compose button"); pg.wait_for_timeout(400)
+    check("msg error status","err" in pg.get_attribute("#status","class") and "Could not send" in pg.inner_text("#status"),pg.inner_text("#status"))
+    check("msg error keeps text",pg.input_value("#m-body")=="Second try")
+    check("msg button re-enabled",pg.is_enabled("#compose button"))
+    ctx.close()
     b.close()
 print(f"PASS {passes}  FAIL {len(fails)}"); print("\n".join(fails))

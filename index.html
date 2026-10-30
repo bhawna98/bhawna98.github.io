@@ -402,11 +402,17 @@
   <section class="fn" id="MSG" aria-labelledby="t-msg" tabindex="-1">
     <h2 class="bar" id="t-msg"><b>MSG</b> Contact <span class="rel">Related <a href="#CF">CF</a></span></h2>
     <div class="msg">
-      <form class="compose" id="compose" action="mailto:bhawna98@hotmail.com" method="get" enctype="text/plain">
-        <div class="field"><span class="fl">To</span><span class="fv">Bhawna Sharma &lt;bhawna98@hotmail.com&gt;</span></div>
-        <div class="field"><label class="fl" for="m-subj">Subject</label><input id="m-subj" name="subject" type="text" value="Hello from your portfolio"></div>
-        <div class="field area"><label class="fl" for="m-body">Message</label><textarea id="m-body" name="body" rows="6"></textarea></div>
-        <div class="send"><button class="key go wide" type="submit">Send</button><span class="hint">Opens your email app with this message ready to send.</span></div>
+      <!-- Messages are relayed to Bhawna's inbox by Web3Forms. The access key is public by design: it can only send to her. -->
+      <form class="compose" id="compose" action="https://api.web3forms.com/submit" method="post">
+        <input type="hidden" name="access_key" value="761ae6f6-6766-41b0-900d-f7e1c6fb86bb">
+        <input type="hidden" name="from_name" value="Portfolio contact form">
+        <input type="checkbox" name="botcheck" class="trap" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <div class="field"><span class="fl">To</span><span class="fv">Bhawna Sharma</span></div>
+        <div class="field"><label class="fl" for="m-name">Name</label><input id="m-name" name="name" type="text" autocomplete="name" required maxlength="120"></div>
+        <div class="field"><label class="fl" for="m-from">Email</label><input id="m-from" name="email" type="email" autocomplete="email" required maxlength="200"></div>
+        <div class="field"><label class="fl" for="m-subj">Subject</label><input id="m-subj" name="subject" type="text" value="Hello from your portfolio" maxlength="200"></div>
+        <div class="field area"><label class="fl" for="m-body">Message</label><textarea id="m-body" name="message" rows="6" required maxlength="5000"></textarea></div>
+        <div class="send"><button class="key go wide" type="submit">Send</button><span class="hint" id="m-hint" aria-live="polite">Goes straight to Bhawna's inbox. Your email is used only to reply.</span></div>
       </form>
       <dl class="kv direct">
         <div><dt>Email</dt><dd><a href="mailto:bhawna98@hotmail.com">bhawna98@hotmail.com</a></dd></div>
