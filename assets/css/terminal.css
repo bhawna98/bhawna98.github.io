@@ -100,6 +100,8 @@ kbd.k.red { background: var(--down); color: var(--black); }
 .tape b { color: var(--text); font-weight: 600; margin: 0 4px; }
 .tape em { font-style: normal; }
 .tape .flat { color: var(--muted); }
+.tape .hl { color: var(--key); }
+.tape .hl b { color: #FFFFFF; font-weight: 700; }
 @keyframes tape { to { transform: translateX(-50%); } }
 
 /* ---------- function menu ---------- */
@@ -114,9 +116,11 @@ kbd.k.red { background: var(--down); color: var(--black); }
 .fkeys li:first-child a { border-left: 1px solid var(--rule); }
 .fkeys kbd { font: 500 10px var(--mono); color: var(--muted); }
 .fkeys b { color: var(--amber); font-weight: 700; }
+.fkeys a span { color: #C4C4C4; }
+.fkeys a.pri span { color: var(--text); font-weight: 600; }
 .fkeys a:hover { background: #111; color: var(--text); }
 .fkeys a[aria-current="page"] { background: var(--amber); color: var(--black); }
-.fkeys a[aria-current="page"] b, .fkeys a[aria-current="page"] kbd { color: var(--black); }
+.fkeys a[aria-current="page"] b, .fkeys a[aria-current="page"] kbd, .fkeys a[aria-current="page"] span { color: var(--black); }
 
 /* ---------- desk: main screen + BIO card ---------- */
 .desk {
@@ -152,7 +156,21 @@ kbd.k.red { background: var(--down); color: var(--black); }
 /* ---------- DES ---------- */
 .des { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 0 28px; padding: 18px 14px 0; }
 .name { font: 600 30px/1.1 var(--mono); letter-spacing: -0.03em; color: var(--text); }
-.role { color: var(--amber); margin-top: 6px; }
+.role { color: var(--amber); margin-top: 6px; font-size: 13px; font-weight: 600; }
+.sub { color: var(--muted); margin-top: 2px; }
+.try { display: flex; flex-wrap: wrap; gap: 6px 16px; list-style: none; margin: 14px 0 0; padding: 8px 10px; border: 1px solid var(--rule); background: #050505; }
+.try::before { content: "TRY"; color: var(--amber); font-weight: 700; font-size: 10.5px; align-self: center; }
+.try a { display: inline-flex; align-items: center; gap: 5px; color: #C4C4C4; text-decoration: none; font-size: 11px; }
+.try a:hover { color: var(--text); }
+.try a:hover kbd.k { background: var(--amber); }
+.try .go-k { color: var(--up); font-weight: 700; font-size: 10px; }
+.prose .more { margin-top: .8em; }
+.prose .more > summary { cursor: pointer; color: var(--amber); font: 600 11px var(--mono); list-style: none; width: max-content; }
+.prose .more > summary::-webkit-details-marker { display: none; }
+.prose .more > summary::after { content: " \25B8"; display: inline-block; transition: transform .15s; }
+.prose .more[open] > summary::after { transform: rotate(90deg); }
+.prose .more[open] > summary { margin-bottom: .8em; }
+.prose .more > p + p { margin-top: .8em; }
 .lede { font: 400 21px/1.4 var(--sans); color: var(--text); max-width: 36ch; margin-bottom: 14px; }
 .prose { font: 400 15.5px/1.6 var(--sans); color: #CFCFCF; max-width: 66ch; }
 .prose p + p { margin-top: .8em; }
@@ -248,6 +266,15 @@ kbd.k.red { background: var(--down); color: var(--black); }
 
 /* ---------- DEAL log ---------- */
 .dlog { margin: 16px 14px 0; }
+/* DEAL headline tiles: the four outcomes worth clicking */
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; list-style: none; margin: 4px 14px 18px; padding: 0; }
+.tiles a { display: flex; flex-direction: column; height: 100%; padding: 10px 12px; border: 1px solid var(--rule); border-top: 2px solid var(--amber); background: #070707; text-decoration: none; color: var(--text); }
+.tiles a:hover { background: var(--navy); border-color: var(--amber-dim); border-top-color: var(--amber); }
+.tiles .tk { color: var(--amber); font-size: 10.5px; font-weight: 600; text-transform: uppercase; }
+.tiles .tv { color: var(--up); font: 700 22px/1.2 var(--mono); letter-spacing: -0.03em; margin: 6px 0 4px; }
+.tiles .tt { font: 400 14px/1.35 var(--sans); color: #CFCFCF; flex: 1; }
+.tiles .tc { margin-top: 10px; color: var(--key); font-size: 10.5px; font-weight: 700; }
+
 .dhead, .drow > summary {
   display: grid; grid-template-columns: 6.5em minmax(0, 1.3fr) minmax(0, 1.5fr) 9.5em minmax(0, 1fr);
   gap: 12px; align-items: baseline;
@@ -421,6 +448,7 @@ blockquote footer { margin-top: 6px; color: var(--amber); font-size: 10.5px; }
   .gp-read dl div:nth-child(2) { border-right: 0; }
   .gp-read dl div:nth-child(-n+2) { border-bottom: 1px solid var(--rule); }
   .gp-read .gr-hint { display: none; }
+  .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .gp-read .gr-flag { height: calc(2.6em + 10px); white-space: normal; }
   .card { display: block; }
   .clock span { display: none; }
@@ -435,6 +463,8 @@ blockquote footer { margin-top: 6px; color: var(--amber); font-size: 10.5px; }
   .fkeys ol { padding: 0; }
   .name { font-size: 24px; }
   .lede { font-size: 19px; }
+  .tiles .tv { font-size: 17px; }
+  .tiles { margin: 4px 12px 16px; }
   .consensus { grid-template-columns: 1fr; gap: 12px; }
   .recs { grid-template-columns: 1fr; }
   .grid td:not(.d):not(.f):not(.r) { font-size: 14px; }
@@ -447,7 +477,7 @@ blockquote footer { margin-top: 6px; color: var(--amber); font-size: 10.5px; }
   .tape { overflow-x: auto; }
   .booted .screen .fn.on { animation: none; }
   .drow .oc::before { transition: none; }
-  .gp .item, .gp .flag, .legend tr[data-flag] { transition: none; }
+  .gp .item, .gp .flag, .legend tr[data-flag], .prose .more > summary::after { transition: none; }
 }
 
 @media print {

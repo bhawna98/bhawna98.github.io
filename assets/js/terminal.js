@@ -4,14 +4,14 @@
 
   var FUNCS = [
     { code: "DES",  label: "Profile",         alias: ["PROFILE", "ABOUT", "BIO", "HOME", "BSHARMA"] },
-    { code: "GP",   label: "Career graph",    alias: ["GRAPH", "CHART", "CAREER", "TIMELINE"] },
+    { code: "GP",   label: "Career",          alias: ["GRAPH", "CHART", "CAREER", "TIMELINE"] },
     { code: "DEAL", label: "Selected work",   alias: ["WORK", "WINS", "CASES", "DEALS", "RFP"] },
-    { code: "HP",   label: "History",         alias: ["HISTORY", "CV", "RESUME", "EXPERIENCE", "JOBS"] },
+    { code: "HP",   label: "Experience",      alias: ["HISTORY", "CV", "RESUME", "EXPERIENCE", "JOBS"] },
     { code: "CN",   label: "Coverage",        alias: ["NEWS", "MEDIA", "COVERAGE", "PRESS", "TOP"] },
     { code: "ANR",  label: "Recommendations", alias: ["RECS", "RECOMMENDATIONS", "REFERENCES", "REVIEWS"] },
     { code: "HELP", label: "Questions",       alias: ["FAQ", "QUESTIONS", "?"] },
     { code: "MSG",  label: "Contact",         alias: ["CONTACT", "EMAIL", "HIRE", "IB", "CALL"] },
-    { code: "CF",   label: "Download",        alias: ["PDF", "DOWNLOAD", "FILES", "PORTFOLIO"] }
+    { code: "CF",   label: "Portfolio PDF",   alias: ["PDF", "DOWNLOAD", "FILES", "PORTFOLIO"] }
   ];
   var IGNORE = { BSHARMA: 0, SP: 1, EQUITY: 1, GO: 1, "<GO>": 1 };
   var DEFAULT_STATUS = "Type a function and press Enter, or press 1 to 9.";
@@ -240,6 +240,20 @@
         note("Could not send. Please email bhawna98@hotmail.com instead.", "err");
       })
       .then(function () { sendBtn.disabled = false; });
+  });
+
+  // ---------- DES: "try" keys type the function into the command line, then run it ----------
+  document.querySelectorAll("[data-try]").forEach(function (a) {
+    a.addEventListener("click", function (e) {
+      e.preventDefault();
+      var text = a.getAttribute("data-try"), i = 0;
+      if (reduce) { run(text); return; }
+      (function type() {
+        input.value = text.slice(0, ++i);
+        if (i < text.length) return setTimeout(type, 70);
+        setTimeout(function () { input.value = ""; run(text); }, 160);
+      })();
+    });
   });
 
   // ---------- GP: crosshair, highlights and a readout strip ----------

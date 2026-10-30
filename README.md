@@ -1,7 +1,7 @@
 # Bhawna Sharma: terminal edition
 
 A second version of the portfolio, styled as a Bloomberg terminal. Same content and
-confidentiality rules as `../website`. Plain HTML/CSS/JS, no build step, ready for GitHub Pages.
+confidentiality rules as `../website`. Plain HTML/CSS/JS, no build step, hosted on GitHub Pages.
 
 ## How it works
 
@@ -19,7 +19,8 @@ confidentiality rules as `../website`. Plain HTML/CSS/JS, no build step, ready f
 |---|---|
 | `index.html` | All content. |
 | `assets/css/terminal.css` | Styles. Colours are defined once at the top. |
-| `assets/js/terminal.js` | Command line, shortcuts, clock, ticker, coverage filters, email composer. |
+| `assets/js/terminal.js` | Command line, shortcuts, clock, ticker, coverage filters, contact form, career-graph crosshair. |
+| `assets/js/analytics.js` | Google Analytics. The measurement ID is set once at the top; each function is reported as its own page (`/GP`, `/DEAL`...). Off on localhost. |
 | `assets/fonts/` | Martian Mono and IBM Plex Sans Condensed, self-hosted (SIL Open Font License, included). |
 | `Bhawna-Sharma-Portfolio.pdf` | Copied from `../website` (rebuild there, then copy here). |
 | `scripts/test.py` | 220+ Playwright checks: every function, command line, aliases, autocomplete, deep links, filters, no-JS and reduced-motion fallbacks, three screen sizes. |

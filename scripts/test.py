@@ -163,6 +163,19 @@ with sync_playwright() as pw:
             check(f"gp {w} no hscroll",pg.evaluate("document.documentElement.scrollWidth")<=w)
         check(f"gp {w} no errors",not errs,str(errs))
         ctx.close()
+    # DES try keys, bio toggle, DEAL tiles
+    for w,h in [(1440,900),(390,844)]:
+        ctx=b.new_context(viewport=dict(width=w,height=h)); pg=ctx.new_page(); pg.goto(base); pg.wait_for_timeout(1300)
+        check(f"{w} full bio collapsed",not pg.is_visible(".prose .more p"))
+        pg.click(".prose .more summary"); check(f"{w} full bio opens",pg.is_visible(".prose .more p"))
+        pg.click('[data-try="DEAL"]'); pg.wait_for_timeout(700)
+        check(f"{w} try DEAL",pg.evaluate("document.querySelector('.fn.on').id")=="DEAL")
+        check(f"{w} tiles 4",pg.eval_on_selector_all(".tiles a","e=>e.length")==4)
+        check(f"{w} tiles no overflow",pg.evaluate("[...document.querySelectorAll('.tiles .tv')].every(e=>e.scrollWidth<=e.clientWidth+1)"))
+        pg.click('.tiles a[href="#deal-rfp"]'); pg.wait_for_timeout(500)
+        check(f"{w} tile opens case",pg.evaluate("document.getElementById('deal-rfp').open"))
+        check(f"{w} no hscroll DEAL tiles",pg.evaluate("document.documentElement.scrollWidth")<=w)
+        ctx.close()
     # contact form: Web3Forms is mocked, nothing is really sent
     ctx=b.new_context(); pg=ctx.new_page(); pg.goto(base+"#MSG"); pg.wait_for_timeout(400)
     sent=[]; reply={"ok":True}
