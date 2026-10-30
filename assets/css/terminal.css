@@ -34,7 +34,7 @@ body {
 }
 a { color: inherit; }
 p { margin: 0; }
-h2, h3, h4 { margin: 0; font-weight: 500; }
+h1, h2, h3, h4 { margin: 0; font-weight: 500; }
 ::selection { background: var(--amber); color: var(--black); }
 :focus-visible { outline: 2px solid var(--key); outline-offset: 1px; }
 
@@ -207,6 +207,42 @@ kbd.k.red { background: var(--down); color: var(--black); }
 .gp .flags .next text { fill: var(--key); }
 .gp .now { stroke: var(--up); stroke-dasharray: 1 3; }
 .gp .now-lbl { fill: var(--up); font-size: 10px; text-anchor: end; }
+
+/* GP interaction: crosshair, highlight, readout strip (Bloomberg-style data line) */
+.gp .item, .gp .flag { cursor: default; transition: opacity .15s; }
+.gp .item[role=link] { cursor: pointer; }
+.gp .item:focus, .gp .flag:focus { outline: none; }
+.gp.hovering .item:not(.hot), .gp.hovering .flag:not(.hot) { opacity: .28; }
+.gp .item.hot rect:not(.future) { stroke: var(--text); stroke-width: 1; }
+.gp .item:focus-visible rect:not(.future), .gp .flag:focus-visible rect { stroke: var(--key); stroke-width: 2; }
+.gp .flag.hot line { stroke: var(--key); stroke-dasharray: none; }
+.gp .xhair { display: none; pointer-events: none; }
+.gp.hovering .xhair { display: inline; }
+.chart-wrap:focus:not(:focus-visible) { outline: none; }
+.gp .xhair line { stroke: var(--amber); stroke-width: 1; }
+.gp .xhair rect { fill: var(--amber); }
+.gp .xhair text { fill: var(--black); font-size: 10px; font-weight: 700; text-anchor: middle; }
+.legend tr.hot { background: var(--navy); }
+.legend tr[data-flag] { transition: background .15s; }
+
+.gp-read { margin: 10px 14px 0; border: 1px solid var(--rule); background: #050505; font-size: 11px; }
+.gp-read.live { border-color: var(--amber-dim); }
+.gp-read .gr-date { display: flex; justify-content: space-between; gap: 10px; padding: 5px 10px; background: var(--navy); }
+.gp-read .gr-date b { color: var(--amber); font-weight: 600; letter-spacing: .02em; }
+.gp-read .gr-hint { color: var(--muted); }
+.gp-read dl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0; }
+.gp-read dl div { padding: 6px 10px; border-right: 1px solid var(--rule); min-width: 0; }
+.gp-read dl div:last-child { border-right: 0; }
+.gp-read dt { color: var(--amber); font-size: 10px; }
+.gp-read dd { margin: 2px 0 0; font: 400 13.5px/1.3 var(--sans); color: var(--text); height: 2.6em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.gp-read dd b { font-weight: 600; }
+.gp-read .off dd { color: #555; }
+.gp-read .gr-study dt { color: #8FB0DE; }
+.gp-read .gr-cfa dt { color: #7E9CC9; }
+.gp-read .gr-flag { padding: 5px 10px; border-top: 1px solid var(--rule); font: 400 13.5px/1.3 var(--sans); height: calc(1.3em + 10px); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.gp-read .gr-flag.off { color: #555; }
+.gp-read .gr-flag.off i { background: #333; color: var(--muted); }
+.gp-read .gr-flag i { font: 700 10px var(--mono); font-style: normal; background: var(--key); color: var(--black); padding: 1px 5px; margin-right: 8px; }
 .legend td.f { width: 1%; color: var(--key); font-weight: 700; font-size: 10px; }
 .legend td.f.next { color: var(--muted); }
 
@@ -381,6 +417,11 @@ blockquote footer { margin-top: 6px; color: var(--amber); font-size: 10.5px; }
   .news a, .news .plain { grid-column: 1 / -1; }
   .news .ty { display: none; }
   .swipe { display: block; }
+  .gp-read dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .gp-read dl div:nth-child(2) { border-right: 0; }
+  .gp-read dl div:nth-child(-n+2) { border-bottom: 1px solid var(--rule); }
+  .gp-read .gr-hint { display: none; }
+  .gp-read .gr-flag { height: calc(2.6em + 10px); white-space: normal; }
   .card { display: block; }
   .clock span { display: none; }
   .keys .upd { display: none; }
@@ -406,6 +447,7 @@ blockquote footer { margin-top: 6px; color: var(--amber); font-size: 10.5px; }
   .tape { overflow-x: auto; }
   .booted .screen .fn.on { animation: none; }
   .drow .oc::before { transition: none; }
+  .gp .item, .gp .flag, .legend tr[data-flag] { transition: none; }
 }
 
 @media print {

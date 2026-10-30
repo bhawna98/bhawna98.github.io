@@ -24,7 +24,7 @@ with sync_playwright() as pw:
         on=lambda: pg.eval_on_selector_all(".fn.on","els=>els.map(e=>e.id)")
         check(f"{w} boot DES",on()==["DES"],str(on()))
         check(f"{w} boot input cleared",pg.input_value("#cmd-in")=="")
-        check(f"{w} title",pg.title().startswith("DES <GO>"),pg.title())
+        check(f"{w} title",pg.title().startswith("Bhawna Sharma | Private Markets"),pg.title())
         # every function via digits, check no hscroll and single section
         for i,f in enumerate(FNS):
             pg.keyboard.press(str(i+1)); pg.wait_for_timeout(120)
@@ -106,6 +106,63 @@ with sync_playwright() as pw:
     check("reduced: no tape anim",pg.evaluate("getComputedStyle(document.querySelector('.tape-track')).animationName")=="none")
     check("reduced: DES immediately",pg.evaluate("getComputedStyle(document.getElementById('DES')).opacity")=="1")
     ctx.close()
+    # SEO basics
+    ctx=b.new_context(); pg=ctx.new_page(); ga=[]
+    pg.on("request",lambda r: ga.append(r.url) if "googletagmanager" in r.url or "google-analytics" in r.url else None)
+    pg.goto(base); pg.wait_for_timeout(500)
+    check("seo one h1",pg.eval_on_selector_all("h1","e=>e.length")==1)
+    check("seo canonical",pg.get_attribute('link[rel=canonical]',"href")=="https://bhawna98.github.io/")
+    check("seo jsonld parses",pg.evaluate("JSON.parse(document.querySelector('script[type=\"application/ld+json\"]').textContent)['@type']")=="ProfilePage")
+    pg.keyboard.press("2"); pg.wait_for_timeout(150)
+    check("title per function",pg.title()=="GP <GO> | Bhawna Sharma",pg.title())
+    check("no analytics locally",not ga,str(ga[:2]))
+    check("trackPage defined",pg.evaluate("typeof window.trackPage")=="function")
+    ctx.close()
+    # GP interaction
+    for w,h in [(1440,900),(390,844)]:
+        ctx=b.new_context(viewport=dict(width=w,height=h),has_touch=w<500); pg=ctx.new_page()
+        errs=[]; pg.on("pageerror",lambda e: errs.append(str(e)))
+        pg.goto(base+"#GP"); pg.wait_for_timeout(400)
+        check(f"gp {w} readout idle","Move across" in pg.inner_text("#gp-read") or w<820,pg.inner_text("#gp-read"))
+        def at(x,y=208):
+            box=pg.eval_on_selector("svg.gp","s=>{const m=s.getScreenCTM();return [m.a,m.d,m.e,m.f]}")
+            pg.evaluate("([x,y])=>document.querySelector('.chart-wrap').scrollLeft=0",[x,y]) if False else None
+            pg.mouse.move(box[0]*x+box[2],box[1]*y+box[3]); pg.wait_for_timeout(120)
+        if w>=820:
+            h0=pg.evaluate("document.getElementById('gp-read').offsetHeight")
+            at(620,240)  # Edelman era, empty spot
+            check("gp readout height stable",pg.evaluate("document.getElementById('gp-read').offsetHeight")==h0)
+            r=pg.inner_text("#gp-read")
+            check("gp crosshair date","2022" in r or "2023" in r,r)
+            check("gp edelman active","Edelman" in r and "Client Executive" in r,r)
+            check("gp klareco dimmed",pg.evaluate("!document.querySelector('[data-hp=hp-klareco]').classList.contains('hot')"))
+            check("gp hovering class",pg.evaluate("document.querySelector('svg.gp').classList.contains('hovering')"))
+            at(800,258)  # on Partners Group bar
+            r=pg.inner_text("#gp-read")
+            check("gp bar detail","Partners Group" in r and "Content Expert" in r and "HP" in r,r)
+            check("gp bar alone hot",pg.eval_on_selector_all(".gp .item.hot","e=>e.length")==1)
+            at(851,38)  # flag 5
+            check("gp flag readout","63.65" in pg.inner_text("#gp-read"),pg.inner_text("#gp-read"))
+            check("gp readout height stable w/ flag",pg.evaluate("document.getElementById('gp-read').offsetHeight")==h0)
+            check("gp flag row hot",pg.evaluate("document.querySelector('.legend tr[data-flag=\"5\"]').classList.contains('hot')"))
+            pg.mouse.move(5,5); pg.wait_for_timeout(120)
+            check("gp clears",not pg.evaluate("document.querySelector('svg.gp').classList.contains('hovering')"))
+            pg.hover('.legend tr[data-flag="2"]'); pg.wait_for_timeout(120)
+            check("gp legend->flag",pg.evaluate("document.querySelector('.flag[data-flag=\"2\"]').classList.contains('hot')"))
+            pg.click('[data-hp=hp-edelman]'); pg.wait_for_timeout(300)
+            check("gp click opens HP",pg.evaluate("document.querySelector('.fn.on').id")=="HP" and pg.evaluate("document.getElementById('hp-edelman').open"))
+            pg.goto(base+"#GP"); pg.wait_for_timeout(300)
+            pg.focus('[data-hp=hp-ntu]'); pg.wait_for_timeout(120)
+            check("gp keyboard focus readout","Nanyang" in pg.inner_text("#gp-read"),pg.inner_text("#gp-read"))
+            pg.keyboard.press("Enter"); pg.wait_for_timeout(300)
+            check("gp keyboard enter opens HP",pg.evaluate("document.getElementById('hp-ntu').open") and pg.evaluate("document.querySelector('.fn.on').id")=="HP")
+        else:
+            pg.tap('[data-hp=hp-pg] rect'); pg.wait_for_timeout(300)
+            check("gp tap opens HP",pg.evaluate("document.querySelector('.fn.on').id")=="HP")
+            pg.goto(base+"#GP"); pg.wait_for_timeout(300)
+            check(f"gp {w} no hscroll",pg.evaluate("document.documentElement.scrollWidth")<=w)
+        check(f"gp {w} no errors",not errs,str(errs))
+        ctx.close()
     # contact form: Web3Forms is mocked, nothing is really sent
     ctx=b.new_context(); pg=ctx.new_page(); pg.goto(base+"#MSG"); pg.wait_for_timeout(400)
     sent=[]; reply={"ok":True}

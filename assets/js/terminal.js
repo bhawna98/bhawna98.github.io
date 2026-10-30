@@ -24,6 +24,12 @@
   var navLinks = document.querySelectorAll(".fkeys a");
   var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
   var current = null;
+  var HOME_TITLE = document.title;
+
+  function trackView(f) {
+    if (window.trackPage) window.trackPage(f.code, f.label);
+    else window.pendingPage = [f.code, f.label];
+  }
 
   function byCode(code) {
     for (var i = 0; i < FUNCS.length; i++) if (FUNCS[i].code === code) return FUNCS[i];
@@ -54,8 +60,9 @@
       if (a.getAttribute("href") === "#" + f.code) a.setAttribute("aria-current", "page");
       else a.removeAttribute("aria-current");
     });
-    document.title = f.code + " <GO> | Bhawna Sharma";
-    if (current !== f.code) say(f.code + " " + f.label + " loaded.");
+    // The home view keeps the descriptive title search engines show; the rest read like the terminal.
+    document.title = f.code === "DES" ? HOME_TITLE : f.code + " <GO> | Bhawna Sharma";
+    if (current !== f.code) { say(f.code + " " + f.label + " loaded."); trackView(f); }
     // On narrow screens the career graph opens on the most recent years.
     var wrap = sec.querySelector(".chart-wrap");
     if (wrap) wrap.scrollLeft = wrap.scrollWidth;
@@ -226,6 +233,7 @@
       .then(function (res) {
         if (!res.success) throw new Error(res.message);
         compose.reset();
+        if (window.trackEvent) window.trackEvent("generate_lead", { method: "contact_form" });
         note("Message sent. Bhawna will reply to your email.", "ok");
       })
       .catch(function () {
@@ -233,6 +241,117 @@
       })
       .then(function () { sendBtn.disabled = false; });
   });
+
+  // ---------- GP: crosshair, highlights and a readout strip ----------
+  // Positions come straight from the SVG: x = 120 + (year - 2016.583) * 80.
+  var gp = document.querySelector("svg.gp");
+  var readout = document.getElementById("gp-read");
+  if (gp && readout) (function () {
+    var X0 = 120, X1 = 933.4, PER_YEAR = 80, Y0 = 2016.583;
+    var MONTHS = "JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC".split(" ");
+    var LANES = [["study", "Study"], ["cfa", "CFA"], ["comms", "Comms"], ["pm", "Private mkts"]];
+    var xhair = gp.querySelector(".xhair");
+    var xline = xhair.querySelector("line"), xtag = xhair.querySelector("rect"), xtext = xhair.querySelector("text");
+
+    function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return "&#" + c.charCodeAt(0) + ";"; }); }
+    function monthAt(x) {
+      var m = Math.floor((Y0 + (x - X0) / PER_YEAR) * 12 + 1e-6);
+      return MONTHS[m % 12] + " " + Math.floor(m / 12);
+    }
+    // Details for a bar come from its HP row, so the chart never repeats content.
+    var items = [].map.call(gp.querySelectorAll(".item"), function (g) {
+      var r = g.querySelector("rect"), x = +r.getAttribute("x"), w = +r.getAttribute("width");
+      var hp = g.getAttribute("data-hp") && document.getElementById(g.getAttribute("data-hp"));
+      var pick = function (sel, attr) { return hp ? hp.querySelector(sel).textContent : g.getAttribute(attr); };
+      var info = { g: g, x: x, end: x + w + (g.querySelector(".future") ? 13.3 : 0), lane: g.parentNode.classList[1],
+        org: pick(".org", "data-org"), pos: pick(".pos", "data-pos"), d: pick(".d", "data-d"), hp: hp };
+      g.setAttribute("aria-label", info.org + ", " + info.pos + ", " + info.d);
+      if (hp) g.setAttribute("role", "link");
+      return info;
+    });
+    var flags = [].map.call(gp.querySelectorAll(".flag"), function (g) {
+      var n = g.getAttribute("data-flag"), row = document.querySelector('.legend tr[data-flag="' + n + '"]');
+      var cells = row.querySelectorAll("td");
+      var info = { g: g, n: n, row: row, x: +g.querySelector("line").getAttribute("x1"), d: cells[1].textContent, text: cells[2].textContent };
+      g.setAttribute("aria-label", "Flag " + n + ", " + info.d + ": " + info.text);
+      return info;
+    });
+
+    function paint(x, onItem, onFlag) {
+      x = Math.max(X0, Math.min(X1, x));
+      var cols = { study: [], cfa: [], comms: [], pm: [] };
+      items.forEach(function (it) {
+        var hot = onItem ? it === onItem : x >= it.x - 0.5 && x <= it.end + 0.5;
+        it.g.classList.toggle("hot", hot);
+        if (hot) cols[it.lane].push(it);
+      });
+      var flag = onFlag || null;
+      if (!flag && !onItem) flags.forEach(function (f) { if (Math.abs(f.x + 4 - x) <= 6) flag = f; });
+      flags.forEach(function (f) { f.g.classList.toggle("hot", f === flag); f.row.classList.toggle("hot", f === flag); });
+
+      gp.classList.add("hovering");
+      xline.setAttribute("x1", x); xline.setAttribute("x2", x);
+      var tx = Math.max(X0 + 30, Math.min(X1, x));
+      xtag.setAttribute("x", tx - 30); xtext.setAttribute("x", tx);
+      xtext.textContent = monthAt(x);
+
+      render(onItem ? esc(onItem.d) : monthAt(x), onItem && onItem.hp ? "Enter or click: open in HP" : "", cols, flag);
+      readout.classList.add("live");
+    }
+    // Always the same rows, so the chart below never jumps while the pointer moves.
+    function render(date, hint, cols, flag) {
+      var html = '<p class="gr-date"><b>' + date + '</b><span class="gr-hint">' + hint + "</span></p><dl>";
+      LANES.forEach(function (l) {
+        var its = cols[l[0]] || [];
+        html += '<div class="gr-' + l[0] + (its.length ? "" : " off") + '"><dt>' + l[1] + "</dt><dd>" +
+          (its.length ? its.map(function (it) { return "<b>" + esc(it.org) + "</b> " + esc(it.pos); }).join("; ") : "&ndash;") + "</dd></div>";
+      });
+      html += '</dl><p class="gr-flag' + (flag ? "" : " off") + '">' +
+        (flag ? "<i>" + flag.n + "</i>" + esc(flag.d) + " &middot; " + esc(flag.text) : "<i>&ndash;</i>No flagged event at this date") + "</p>";
+      readout.innerHTML = html;
+    }
+    function clear() {
+      gp.classList.remove("hovering");
+      items.forEach(function (it) { it.g.classList.remove("hot"); });
+      flags.forEach(function (f) { f.g.classList.remove("hot"); f.row.classList.remove("hot"); });
+      readout.classList.remove("live");
+      render("GP", "Move across the chart to read any month.", {}, null);
+    }
+    function svgX(e) {
+      var pt = gp.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+      return pt.matrixTransform(gp.getScreenCTM().inverse()).x;
+    }
+    function owner(t, list) { for (var i = 0; i < list.length; i++) if (list[i].g.contains(t)) return list[i]; return null; }
+
+    gp.addEventListener("pointermove", function (e) {
+      if (e.pointerType === "touch") return;
+      var it = owner(e.target, items), fl = owner(e.target, flags);
+      paint(fl ? fl.x : svgX(e), it, fl);
+    });
+    gp.addEventListener("pointerleave", function () { if (!gp.contains(document.activeElement)) clear(); });
+    gp.addEventListener("focusin", function (e) {
+      var it = owner(e.target, items), fl = owner(e.target, flags);
+      if (it) paint((it.x + Math.min(it.end, X1)) / 2, it, null);
+      else if (fl) paint(fl.x, null, fl);
+    });
+    gp.addEventListener("focusout", function (e) { if (!gp.contains(e.relatedTarget)) clear(); });
+    function open(it) { if (it && it.hp) location.hash = it.hp.id; }
+    gp.addEventListener("click", function (e) {
+      var it = owner(e.target, items);
+      if (it && it.hp) open(it);
+      else paint(svgX(e), it, owner(e.target, flags));
+    });
+    gp.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") { var it = owner(e.target, items); if (it && it.hp) { e.preventDefault(); open(it); } }
+    });
+    // The legend and the flags point at each other.
+    flags.forEach(function (f) {
+      f.row.addEventListener("mouseenter", function () { paint(f.x, null, f); });
+      f.row.addEventListener("mouseleave", clear);
+    });
+    readout.hidden = false;
+    clear();
+  })();
 
   // ---------- first paint: type the command, then draw the screen ----------
   if (!location.hash && !reduce) {
