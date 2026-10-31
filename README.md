@@ -22,7 +22,7 @@ confidentiality rules as `../website`. Plain HTML/CSS/JS, no build step, hosted 
 | `assets/js/terminal.js` | Command line, shortcuts, clock, ticker, coverage filters, contact form, career-graph crosshair. |
 | `assets/js/analytics.js` | Google Analytics. The measurement ID is set once at the top; each function is reported as its own page (`/GP`, `/DEAL`...). Off on localhost. |
 | `assets/fonts/` | Martian Mono and IBM Plex Sans Condensed, self-hosted (SIL Open Font License, included). |
-| `Bhawna-Sharma-Portfolio.pdf` | Copied from `../website` (rebuild there, then copy here). |
+| `Bhawna-Sharma-Resume.pdf` | Copied from `../applications/website/Bhawna_Sharma_Resume.pdf` (edit the .tex there, rebuild with `tectonic`, then copy here). |
 | `scripts/test.py` | 220+ Playwright checks: every function, command line, aliases, autocomplete, deep links, filters, no-JS and reduced-motion fallbacks, three screen sizes. |
 | `scripts/og.py` | Regenerates the link-preview image. |
 | `scripts/publish.sh` | Runs the tests, commits and pushes. GitHub Pages redeploys automatically. |
@@ -38,8 +38,8 @@ Live at **https://bhawna98.github.io/**, served by GitHub Pages from the `main` 
 2. Preview: `python3 -m http.server 8000`, then open http://localhost:8000
 3. Publish: `scripts/publish.sh "Describe the change"`
 
-The script runs the tests and refuses to publish if any fail. To refresh the PDF after rebuilding it
-in `../website`, run `scripts/publish.sh --copy-pdf`. If you change the headshot or headline, also run
+The script runs the tests and refuses to publish if any fail. To refresh the résumé after rebuilding it
+in `../applications/website`, run `scripts/publish.sh --copy-pdf`. If you change the headshot or headline, also run
 `python3 scripts/og.py` so link previews match.
 
 ### One-time setup (already done locally; only needed on a new machine)

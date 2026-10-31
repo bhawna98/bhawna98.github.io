@@ -11,7 +11,7 @@
     { code: "ANR",  label: "Recommendations", alias: ["RECS", "RECOMMENDATIONS", "REFERENCES", "REVIEWS"] },
     { code: "HELP", label: "Questions",       alias: ["FAQ", "QUESTIONS", "?"] },
     { code: "MSG",  label: "Contact",         alias: ["CONTACT", "EMAIL", "HIRE", "IB", "CALL"] },
-    { code: "CF",   label: "Portfolio PDF",   alias: ["PDF", "DOWNLOAD", "FILES", "PORTFOLIO"] }
+    { code: "CF",   label: "Résumé PDF",     alias: ["PDF", "DOWNLOAD", "FILES", "PORTFOLIO", "RESUME"] }
   ];
   var IGNORE = { BSHARMA: 0, SP: 1, EQUITY: 1, GO: 1, "<GO>": 1 };
   var DEFAULT_STATUS = "Type a function and press Enter, or press 1 to 9.";

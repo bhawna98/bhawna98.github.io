@@ -7,8 +7,8 @@ cd "$(dirname "$0")/.."
 msg="${1:-Update site}"
 
 if [ "$2" = "--copy-pdf" ] || [ "$1" = "--copy-pdf" ]; then
-  cp ../website/Bhawna-Sharma-Portfolio.pdf .
-  [ "$1" = "--copy-pdf" ] && msg="Update portfolio PDF"
+  cp ../applications/website/Bhawna_Sharma_Resume.pdf Bhawna-Sharma-Resume.pdf
+  [ "$1" = "--copy-pdf" ] && msg="Update résumé PDF"
 fi
 
 out=$(python3 scripts/test.py 2>&1) || true
